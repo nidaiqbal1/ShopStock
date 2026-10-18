@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShopStock — Smart Shop &amp; Inventory Management</title>
+<meta name="description" content="ShopStock: a Flask + SQLite POS, khata (udhaar), inventory and reporting system for small retail shops in Pakistan. English and Urdu invoices, offline, no subscription.">
+<meta property="og:title" content="ShopStock — Smart Shop & Inventory Management">
+<meta property="og:description" content="POS, khata, inventory, suppliers, expenses, profit insights and Urdu invoices. Built with Flask and SQLite.">
+<meta property="og:image" content="img/cover.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{--primary:#2563eb;--primary-600:#1d4ed8;--primary-50:#eff6ff;--ink:#0f172a;--ink-2:#334155;--muted:#64748b;--line:#e2e8f0;--bg:#f8fafc;--surface:#fff;--dark:#0b1220;--ok:#059669}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,"Segoe UI",system-ui,-apple-system,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--primary)}img{max-width:100%;display:block}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{font-weight:750;font-size:1.15rem;color:var(--ink);text-decoration:none;letter-spacing:-.01em}.brand b{color:var(--primary)}
+nav .links{display:flex;gap:20px;align-items:center}nav .links a{color:var(--ink-2);text-decoration:none;font-size:.92rem}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;font-weight:600;text-decoration:none;border:1px solid transparent;font-size:.95rem}
+.btn-p{background:var(--primary);color:#fff}.btn-p:hover{background:var(--primary-600)}
+.btn-o{background:#fff;color:var(--ink);border-color:var(--line)}.btn-o:hover{border-color:#cbd5e1}
+.hero{padding:72px 0 40px;background:radial-gradient(1000px 400px at 70% -10%,var(--primary-50),transparent)}
+.hero .tag{display:inline-block;background:var(--primary-50);color:var(--primary-600);border:1px solid #dbeafe;padding:4px 12px;border-radius:99px;font-size:.82rem;font-weight:600}
+h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.025em;margin:18px 0 14px;max-width:760px}
+.lead{font-size:1.15rem;color:var(--ink-2);max-width:640px;margin:0 0 26px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.shot{margin-top:44px;border-radius:16px;border:1px solid var(--line);box-shadow:0 24px 60px -16px rgba(15,23,42,.3);overflow:hidden;background:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:40px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}.stat b{display:block;font-size:1.7rem;letter-spacing:-.02em;color:var(--primary)}.stat span{color:var(--muted);font-size:.9rem}
+section{padding:56px 0}section h2{font-size:1.8rem;letter-spacing:-.02em;margin:0 0 6px}.sub{color:var(--muted);margin:0 0 28px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}.card h3{margin:0 0 6px;font-size:1.05rem}.card p{margin:0;color:var(--ink-2);font-size:.94rem}
+.ico{font-size:1.5rem;margin-bottom:8px}
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+figcaption{padding:12px 16px;font-weight:600;font-size:.92rem;border-top:1px solid var(--line)}figcaption span{color:var(--muted);font-weight:400}
+.mob{display:flex;justify-content:center;background:var(--bg);padding:16px}.mob img{width:210px;border-radius:14px;border:1px solid var(--line)}
+.tech{display:flex;flex-wrap:wrap;gap:10px}.tech span{background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.9rem;font-weight:500}
+pre{background:var(--dark);color:#e2e8f0;padding:20px;border-radius:14px;overflow:auto;font-size:.9rem;line-height:1.7}pre i{color:#64748b;font-style:normal}
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;color:#78350f;font-size:.93rem;margin-top:18px}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:.9rem;background:#fff}
+@media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid,.gallery{grid-template-columns:1fr}nav .links a.h{display:none}.hero{padding-top:44px}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><a class="brand" href="#top">Shop<b>Stock</b></a>
+<div class="links"><a class="h" href="#features">Features</a><a class="h" href="#screens">Screenshots</a><a class="h" href="#run">Run it</a>
+<a class="btn btn-p" style="padding:8px 16px" href="https://github.com/YOUR-USERNAME/ShopStock">GitHub</a></div></div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+<span class="tag">Flask · SQLite · Works offline · English + اردو</span>
+<h1>Run your whole shop from one simple screen.</h1>
+<p class="lead">ShopStock is a point-of-sale, khata (udhaar), inventory and reporting system built for small retail shops in Pakistan. No subscription, no internet needed.</p>
+<div class="cta"><a class="btn btn-p" href="https://github.com/YOUR-USERNAME/ShopStock">View source on GitHub</a><a class="btn btn-o" href="#screens">See screenshots</a></div>
+<div class="shot"><img src="img/dashboard.webp" width="1200" height="1100" alt="ShopStock dashboard with sales, profit, low-stock alerts and charts"></div>
+<div class="stats">
+<div class="stat"><b>15+</b><span>modules: POS, khata, stock, suppliers…</span></div>
+<div class="stat"><b>189</b><span>automated end-to-end checks</span></div>
+<div class="stat"><b>2</b><span>languages for invoices (EN / اردو)</span></div>
+<div class="stat"><b>0</b><span>paid APIs or monthly fees</span></div></div>
+</div></header>
+
+<section id="features"><div class="wrap"><h2>Everything a general store needs</h2><p class="sub">Built around how shopkeepers actually work.</p>
+<div class="grid">
+<div class="card"><div class="ico">🛒</div><h3>Fast POS</h3><p>Barcode or name search, discounts, and Cash, Bank, Easypaisa, JazzCash or Credit/Udhaar payments.</p></div>
+<div class="card"><div class="ico">📒</div><h3>Digital khata</h3><p>Customer balances are always calculated from records. Statements and WhatsApp payment reminders.</p></div>
+<div class="card"><div class="ico">📦</div><h3>Inventory control</h3><p>Stock can never go negative. Every change is logged. Low-stock alerts and stock value.</p></div>
+<div class="card"><div class="ico">🚚</div><h3>Suppliers &amp; purchases</h3><p>Record purchases, track what you owe, and pay suppliers in part or in full.</p></div>
+<div class="card"><div class="ico">📊</div><h3>Profit insights</h3><p>Live dashboard, best sellers, receivables and expenses. PDF and Excel reports.</p></div>
+<div class="card"><div class="ico">🧾</div><h3>Urdu invoices</h3><p>A4 PDF invoices in English or Urdu, plus 80mm thermal receipts for shop printers.</p></div>
+<div class="card"><div class="ico">↩️</div><h3>Returns, void &amp; delete</h3><p>Handle returns and mistakes safely. Owners can delete records with clear warnings.</p></div>
+<div class="card"><div class="ico">🔐</div><h3>Roles &amp; backups</h3><p>Owner and Cashier roles, CSRF protection, hashed passwords, automatic daily backups.</p></div>
+<div class="card"><div class="ico">🤖</div><h3>Read-only AI assistant</h3><p>Ask questions about your shop, answered from real data only. Your API key stays in an environment variable.</p></div>
+</div></div></section>
+
+<section id="screens" style="background:#fff;border-block:1px solid var(--line)"><div class="wrap"><h2>Screenshots</h2><p class="sub">Captured from the running app using sample data.</p>
+<div class="gallery">
+<figure><img loading="lazy" src="img/pos.webp" width="1200" height="750" alt="Point of sale screen"><figcaption>Point of sale <span>· barcode search, credit sales</span></figcaption></figure>
+<figure><img loading="lazy" src="img/khata.webp" width="1200" height="750" alt="Khata customer ledger"><figcaption>Khata <span>· who owes what</span></figcaption></figure>
+<figure><img loading="lazy" src="img/products.webp" width="1200" height="750" alt="Products list"><figcaption>Products <span>· stock status at a glance</span></figcaption></figure>
+<figure><img loading="lazy" src="img/invoice.webp" width="1200" height="750" alt="Invoice page"><figcaption>Invoices <span>· PDF, thermal, WhatsApp</span></figcaption></figure>
+<figure><img loading="lazy" src="img/reports.webp" width="1200" height="750" alt="Reports"><figcaption>Reports <span>· sales, profit, receivables</span></figcaption></figure>
+<figure><img loading="lazy" src="img/urdu.webp" width="1200" height="833" alt="Urdu right-to-left dashboard"><figcaption>اردو interface <span>· right-to-left layout</span></figcaption></figure>
+<figure><div class="mob"><img loading="lazy" src="img/mobile.webp" width="420" height="862" alt="Mobile dashboard"></div><figcaption>Mobile friendly <span>· use it from a phone</span></figcaption></figure>
+<figure><img loading="lazy" src="img/login.webp" width="1200" height="750" alt="Login screen"><figcaption>Secure login <span>· forced password change on first run</span></figcaption></figure>
+</div></div></section>
+
+<section><div class="wrap"><h2>Built with</h2><p class="sub">Simple, dependable and easy to deploy on a shop PC.</p>
+<div class="tech"><span>Python 3.11</span><span>Flask</span><span>SQLAlchemy</span><span>SQLite</span><span>ReportLab</span><span>openpyxl</span><span>Bootstrap 5</span><span>Chart.js</span><span>Waitress</span><span>PyInstaller</span><span>Inno Setup</span></div></div></section>
+
+<section id="run" style="padding-top:0"><div class="wrap"><h2>Run it on your computer</h2><p class="sub">ShopStock keeps shop data on the shop's own PC, so it runs locally.</p>
+<pre>git clone https://github.com/YOUR-USERNAME/ShopStock.git
+cd ShopStock
+pip install -r requirements.txt
+python app.py   <i># opens http://127.0.0.1:5000</i>
+<i># first login: admin / admin123 (you must change it right away)</i></pre>
+<div class="note"><b>Why isn't there a live demo here?</b> A shop database holds real customer and money records, so it belongs on the shop's own computer, not on a public web server. This page is the project showcase. The full source and a step-by-step guide are on GitHub.</div>
+</div></section>
+
+<footer><div class="wrap">ShopStock · Built by Nida Iqbal · <a href="https://github.com/YOUR-USERNAME/ShopStock">GitHub</a> · <a href="https://www.linkedin.com/in/YOUR-LINKEDIN">LinkedIn</a></div></footer>
+</body></html>

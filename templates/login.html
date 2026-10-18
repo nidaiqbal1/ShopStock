@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block shell %}
+<div class="login-wrap"><div class="card login-card">
+  <div class="text-center mb-3"><div class="fs-1 text-primary"><i class="bi bi-shop-window"></i></div><h3 class="fw-bold mb-0">ShopStock</h3><div class="text-muted">Smart Shop &amp; Inventory Management</div></div>
+  <form method="post">{{ csrf_input() }}
+    <div class="mb-3"><label class="form-label">{{ t('Username') }}</label><input name="username" class="form-control" required autofocus autocomplete="username"></div>
+    <div class="mb-3"><label class="form-label">{{ t('Password') }}</label><input type="password" name="password" class="form-control" required autocomplete="current-password"></div>
+    <button class="btn btn-primary w-100">{{ t('Sign in') }}</button><div class="text-center mt-3"><a href="{{ url_for('auth.set_language', code='en') }}">English</a> · <a href="{{ url_for('auth.set_language', code='ur') }}">اردو</a></div>
+  </form></div></div>
+{% endblock %}

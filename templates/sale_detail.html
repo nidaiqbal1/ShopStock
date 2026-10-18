@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% block title %}{{ s.invoice_no }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><h1>Invoice {{ s.invoice_no }}</h1><div class="d-flex flex-wrap gap-2">
+ <a class="btn btn-primary" href="{{ url_for('sales.invoice_pdf', sid=s.id, lang='en') }}"><i class="bi bi-download"></i> Download PDF</a>
+ <a class="btn btn-primary" href="{{ url_for('sales.invoice_pdf', sid=s.id, lang='ur') }}"><i class="bi bi-download"></i> اردو PDF</a>
+ <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Print Invoice</button>
+ <a class="btn btn-outline-secondary" target="_blank" href="{{ url_for('sales.receipt', sid=s.id, print=1) }}"><i class="bi bi-receipt-cutoff"></i> Thermal receipt</a>
+ {% if is_owner and s.status == 'completed' %}<button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#returnModal"><i class="bi bi-arrow-return-left"></i> Return items</button>
+ <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#voidModal"><i class="bi bi-x-octagon"></i> Void sale</button>{% endif %}
+ {% if is_owner %}<button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash"></i> Delete</button>{% endif %}
+ {% if wa %}<a class="btn btn-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.send_invoice', sid=s.id) }}">💬 Send Invoice on WhatsApp</a>{% endif %}
+ {% if s.customer and s.customer.balance > 0 and wa %}<a class="btn btn-outline-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.send_reminder', cid=s.customer.id) }}">Send Payment Reminder</a>{% endif %}</div></div>
+{% if s.status == 'voided' %}<div class="alert alert-danger"><b>VOIDED</b>{% if s.void_reason %} — {{ s.void_reason }}{% endif %}. Stock was restored and this sale is excluded from reports.</div>{% endif %}
+<div class="card"><div class="card-body p-4">
+ <div class="d-flex justify-content-between flex-wrap"><div><h3 class="text-primary mb-0">{{ shop.shop_name }}</h3><div class="text-muted small">{{ shop.address }}<br>{{ shop.phone }} {{ shop.email }}</div></div>
+ <div class="text-end"><div class="fw-bold fs-5">{{ s.invoice_no }}</div><div>{{ s.date.strftime('%d %b %Y') }}</div><div class="small text-muted">Payment: {{ s.payment_method }}</div></div></div><hr>
+ <div class="mb-3"><span class="text-muted">Bill to:</span> <b>{{ s.customer.name if s.customer else 'Walk-in customer' }}</b>{% if s.customer and s.customer.phone %} · {{ s.customer.phone }}{% endif %}</div>
+ <div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody>
+ {% for i in s.items %}<tr><td>{{ i.product_name }}{% if i.returned_qty %} <span class="badge badge-low">returned {{ i.returned_qty|qty }}</span>{% endif %}</td><td class="num">{{ i.quantity|qty }}</td><td class="num">{{ i.selling_price|money }}</td><td class="num">{{ i.subtotal|money }}</td></tr>{% endfor %}</tbody></table></div>
+ <div class="ms-auto" style="max-width:300px"><div class="sum-row"><span>Subtotal</span><span>{{ s.subtotal|money }}</span></div><div class="sum-row"><span>Discount</span><span>- {{ s.discount|money }}</span></div>{% if s.returned_total %}<div class="sum-row"><span>Returns</span><span>- {{ s.returned_total|money }}</span></div>{% endif %}
+ <div class="sum-row big"><span>Grand total</span><span>{{ s.total|money }}</span></div><div class="sum-row"><span>Paid</span><span>{{ s.paid|money }}</span></div><div class="sum-row"><span>Remaining</span><span>{{ s.remaining|money }}</span></div>
+ <div class="sum-row no-print text-muted small"><span>Profit on this sale</span><span>{{ s.profit|money }}</span></div></div>
+ {% if s.returns %}<hr><div class="no-print"><h6>Return history</h6>{% for r in s.returns %}<div class="small">{{ r.date.strftime('%d %b %Y') }}: refund {{ r.refund_amount|money }} (cash {{ r.cash_refunded|money }}, deducted from khata {{ r.credit_applied|money }}){% if r.note %} — {{ r.note }}{% endif %}</div>{% endfor %}</div>{% endif %}
+ <hr><div class="text-center text-muted small">Thank you for shopping with us!</div></div></div>
+{% if is_owner and s.status == 'completed' %}
+<div class="modal fade" id="returnModal" tabindex="-1"><div class="modal-dialog modal-lg"><form method="post" action="{{ url_for('sales.return_items', sid=s.id) }}" class="modal-content">{{ csrf_input() }}
+ <div class="modal-header"><h5 class="modal-title">Return items — {{ s.invoice_no }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+ <div class="modal-body"><table class="table"><thead><tr><th>Product</th><th class="num">Sold</th><th class="num">Already returned</th><th style="width:130px">Return qty</th></tr></thead><tbody>
+ {% for i in s.items %}<tr><td>{{ i.product_name }}</td><td class="num">{{ i.quantity|qty }}</td><td class="num">{{ i.returned_qty|qty }}</td><td><input class="form-control form-control-sm" type="number" step="any" min="0" max="{{ i.returnable_qty }}" name="qty_{{ i.id }}" placeholder="0" {{ 'disabled' if i.returnable_qty <= 0 }}></td></tr>{% endfor %}</tbody></table>
+ <input class="form-control" name="note" maxlength="255" placeholder="Reason / note (optional)">
+ <div class="small text-muted mt-2">Returned items go back into stock. If the customer still owes money on this sale, the refund is deducted from their khata first; the rest is refunded in cash.</div></div>
+ <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-warning">Process return</button></div></form></div></div>
+<div class="modal fade" id="voidModal" tabindex="-1"><div class="modal-dialog"><form method="post" action="{{ url_for('sales.void_sale', sid=s.id) }}" class="modal-content">{{ csrf_input() }}
+ <div class="modal-header"><h5 class="modal-title">Void sale {{ s.invoice_no }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+ <div class="modal-body"><p>Use this when a sale was entered by mistake. Stock is restored and the sale disappears from reports, profit and the customer's khata. This cannot be undone.</p><input class="form-control" name="reason" maxlength="255" placeholder="Reason (optional)"></div>
+ <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger">Void this sale</button></div></form></div></div>
+{% endif %}
+{% if is_owner %}<div class="modal fade" id="deleteModal" tabindex="-1"><div class="modal-dialog"><form method="post" action="{{ url_for('sales.delete_sale', sid=s.id) }}" class="modal-content">{{ csrf_input() }}
+ <div class="modal-header"><h5 class="modal-title">Delete sale {{ s.invoice_no }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+ <div class="modal-body"><p>This permanently removes the sale{% if s.returns %} and its returns{% endif %} from all reports, profit and the customer's khata. This cannot be undone.</p>
+ {% if s.status == 'completed' %}<div class="form-check"><input class="form-check-input" type="checkbox" name="restock" value="1" id="restockChk" checked><label class="form-check-label" for="restockChk">Put the items back in stock</label></div>{% else %}<input type="hidden" name="restock" value="0">{% endif %}</div>
+ <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger">Delete sale</button></div></form></div></div>{% endif %}
+{% endblock %}

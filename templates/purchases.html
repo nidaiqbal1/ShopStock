@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Purchases{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Purchases</h1><a class="btn btn-primary" href="{{ url_for('purchases.new_purchase') }}"><i class="bi bi-bag-plus"></i> Record purchase</a></div>
+<div class="card">{% if purchases %}<div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Supplier</th><th>Items</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Due</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in purchases %}<tr><td>{{ p.date.strftime('%d %b %Y') }}</td><td><a href="{{ url_for('suppliers.view_supplier', sid=p.supplier_id) }}">{{ p.supplier.name }}</a></td>
+<td>{% for i in p.items %}{{ i.display_name }} × {{ i.quantity|qty }} @ {{ i.unit_price|money }}{{ '; ' if not loop.last }}{% endfor %}</td><td class="num">{{ p.total|money }}</td><td class="num">{{ p.paid|money }}</td><td class="num">{{ (p.total - p.paid)|money }}</td>
+<td><span class="badge {{ 'badge-ok' if p.payment_status == 'Paid' else 'badge-low' if p.payment_status == 'Partial' else 'badge-out' }}">{{ p.payment_status }}</span></td>
+<td class="num"><form class="d-inline" method="post" action="{{ url_for('purchases.delete_purchase', pid=p.id) }}" data-confirm="Delete this purchase from {{ p.supplier.name }} ({{ p.total|money }})? The stock it added is taken back out. This cannot be undone.">{{ csrf_input() }}<button class="btn btn-sm btn-light text-danger" title="Delete purchase"><i class="bi bi-trash"></i></button></form></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><i class="bi bi-bag"></i>No purchases recorded yet.</div>{% endif %}</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% block title %}Suppliers{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Suppliers</h1><div class="d-flex gap-2"><a class="btn btn-outline-success" href="{{ url_for('exports.export', kind='suppliers') }}"><i class="bi bi-file-earmark-excel"></i> Excel</a><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#partyModal"><i class="bi bi-plus-lg"></i> Add supplier</button></div></div>
+<form class="mb-3"><div class="input-group" style="max-width:420px"><input class="form-control" name="q" value="{{ q }}" placeholder="Search name, company, phone"><button class="btn btn-primary">Search</button></div></form>
+<div class="card">{% if suppliers %}<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Name</th><th>Company</th><th>Phone</th><th class="num">Amount payable</th><th></th></tr></thead><tbody>
+{% for s in suppliers %}<tr><td><a class="fw-semibold text-decoration-none" href="{{ url_for('suppliers.view_supplier', sid=s.id) }}">{{ s.name }}</a></td><td>{{ s.company or '-' }}</td><td>{{ s.phone or '-' }}</td><td class="num {{ 'text-danger fw-semibold' if s.payable > 0 }}">{{ s.payable|money }}</td>
+<td class="num"><a class="btn btn-sm btn-light" href="{{ url_for('suppliers.view_supplier', sid=s.id) }}"><i class="bi bi-eye"></i></a>
+<button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#partyModal" data-action="{{ url_for('suppliers.edit_supplier', sid=s.id) }}" data-edit='{{ {"name":s.name,"company":s.company,"phone":s.phone,"email":s.email,"address":s.address,"notes":s.notes}|tojson }}'><i class="bi bi-pencil"></i></button>
+<form class="d-inline" method="post" action="{{ url_for('suppliers.delete_supplier', sid=s.id) }}" data-confirm="Delete supplier '{{ s.name }}'? This also deletes {{ s.purchases|length }} purchase record(s) and {{ s.payments|length }} payment(s) for this supplier. Current stock levels are not changed. This cannot be undone.">{{ csrf_input() }}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button></form></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><i class="bi bi-truck"></i>No suppliers yet.</div>{% endif %}</div>
+{% set party = 'supplier' %}{% set new_action = url_for('suppliers.add_supplier') %}{% include "_party_modal.html" %}
+{% endblock %}

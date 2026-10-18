@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Account{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ t('Account') }}</h1></div>
+{% if g.user.must_change_password %}<div class="alert alert-warning"><b>Please choose a new password to continue.</b> The starting password is public, so it must be changed before you use ShopStock.</div>{% endif %}
+<div class="row"><div class="col-lg-5"><form method="post" action="{{ url_for('auth.change_password') }}" class="card card-body">{{ csrf_input() }}
+<div class="mb-2 text-muted">Signed in as <b>{{ g.user.username }}</b> ({{ g.user.role }})</div><h5 class="mb-3">Change password</h5>
+<input class="form-control mb-2" type="password" name="current" placeholder="Current password" required autocomplete="current-password">
+<input class="form-control mb-2" type="password" name="new" placeholder="New password (min 8 characters)" required minlength="8" autocomplete="new-password">
+<input class="form-control mb-3" type="password" name="confirm" placeholder="Confirm new password" required autocomplete="new-password"><button class="btn btn-primary">Update password</button></form></div></div>
+{% endblock %}

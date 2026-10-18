@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Users &amp; roles</h1><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal"><i class="bi bi-person-plus"></i> Add user</button></div>
+<div class="alert alert-info small"><b>Owner</b> can do everything. <b>Cashier</b> can make sales, view products (without cost prices), manage customers and record khata payments — but cannot see profit, reports, expenses, suppliers, backups or settings, and cannot void sales or process returns.</div>
+<div class="card"><div class="table-responsive"><table class="table"><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
+{% for u in users %}<tr><td>{{ u.username }}{% if u.id == g.user.id %} <span class="badge badge-ok">you</span>{% endif %}</td><td>{{ u.full_name }}</td>
+<td><form method="post" action="{{ url_for('users.set_role', uid=u.id) }}" class="d-flex gap-1">{{ csrf_input() }}<select name="role" class="form-select form-select-sm" style="width:110px" onchange="this.form.submit()"><option {{ 'selected' if u.role == 'owner' }}>owner</option><option {{ 'selected' if u.role == 'cashier' }}>cashier</option></select></form></td>
+<td><span class="badge {{ 'badge-ok' if u.is_active else 'badge-out' }}">{{ 'Active' if u.is_active else 'Disabled' }}</span></td>
+<td class="num"><form class="d-inline-flex gap-1" method="post" action="{{ url_for('users.reset_password', uid=u.id) }}">{{ csrf_input() }}<input class="form-control form-control-sm" style="width:140px" type="password" name="password" placeholder="New password" minlength="8" required><button class="btn btn-sm btn-outline-secondary">Reset</button></form>
+<form class="d-inline" method="post" action="{{ url_for('users.toggle_user', uid=u.id) }}" data-confirm="Change active status of '{{ u.username }}'?">{{ csrf_input() }}<button class="btn btn-sm btn-light">{{ 'Disable' if u.is_active else 'Enable' }}</button></form></td></tr>{% endfor %}</tbody></table></div></div>
+<div class="modal fade" id="userModal" tabindex="-1"><div class="modal-dialog"><form method="post" action="{{ url_for('users.add_user') }}" class="modal-content">{{ csrf_input() }}
+<div class="modal-header"><h5 class="modal-title">Add user</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body row g-2">
+<div class="col-md-6"><label class="form-label">Username *</label><input class="form-control" name="username" required maxlength="60"></div><div class="col-md-6"><label class="form-label">Full name</label><input class="form-control" name="full_name" maxlength="120"></div>
+<div class="col-md-6"><label class="form-label">Role</label><select class="form-select" name="role"><option value="cashier">Cashier</option><option value="owner">Owner</option></select></div>
+<div class="col-md-6"><label class="form-label">Starting password *</label><input class="form-control" type="password" name="password" minlength="8" required></div><div class="col-12 small text-muted">The person must change this password when they first log in.</div></div>
+<div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Create user</button></div></form></div></div>
+{% endblock %}

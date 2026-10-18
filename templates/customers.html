@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Customers{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Customers</h1><div class="d-flex gap-2">{% if is_owner %}<a class="btn btn-outline-success" href="{{ url_for('exports.export', kind='customers') }}"><i class="bi bi-file-earmark-excel"></i> Excel</a>{% endif %}<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#partyModal"><i class="bi bi-person-plus"></i> Add customer</button></div></div>
+<form class="mb-3"><div class="input-group" style="max-width:420px"><input class="form-control" name="q" value="{{ q }}" placeholder="Search name or phone"><button class="btn btn-primary">Search</button></div></form>
+<div class="card">{% if customers %}<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th class="num">Outstanding</th><th></th></tr></thead><tbody>
+{% for c in customers %}<tr><td><a class="fw-semibold text-decoration-none" href="{{ url_for('customers.view_customer', cid=c.id) }}">{{ c.name }}</a></td><td>{{ c.phone or '-' }}</td><td>{{ c.address or '-' }}</td>
+<td class="num {{ 'text-danger fw-semibold' if c.balance > 0 }}">{{ c.balance|money }}</td>
+<td class="num"><a class="btn btn-sm btn-light" href="{{ url_for('customers.view_customer', cid=c.id) }}"><i class="bi bi-eye"></i></a>
+<button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#partyModal" data-action="{{ url_for('customers.edit_customer', cid=c.id) }}" data-edit='{{ {"name":c.name,"phone":c.phone,"email":c.email,"address":c.address,"notes":c.notes}|tojson }}'><i class="bi bi-pencil"></i></button>
+{% if is_owner %}<form class="d-inline" method="post" action="{{ url_for('customers.delete_customer', cid=c.id) }}" data-confirm="Delete customer '{{ c.name }}'?{% if c.sales or c.payments %} Their {{ c.sales|length }} sale(s) stay in your reports as walk-in sales, but their khata balance and {{ c.payments|length }} payment record(s) are erased.{% endif %} This cannot be undone.">{{ csrf_input() }}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button></form>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><i class="bi bi-people"></i>No customers yet.</div>{% endif %}</div>
+{% set party = 'customer' %}{% set new_action = url_for('customers.add_customer') %}{% include "_party_modal.html" %}
+{% endblock %}

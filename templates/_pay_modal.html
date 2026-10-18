@@ -1,0 +1,7 @@
+<div class="modal fade pay-modal" id="payModal" tabindex="-1"><div class="modal-dialog"><form method="post" class="modal-content">{{ csrf_input() }}
+ <div class="modal-header"><h5 class="modal-title">{{ pay_title }}: <span class="who"></span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+ <div class="modal-body row g-2"><div class="col-md-6"><label class="form-label">Amount *</label><input class="form-control" type="number" step="any" min="0.01" name="amount" required></div>
+  <div class="col-md-6"><label class="form-label">Method</label><select class="form-select" name="method">{% for m in methods %}<option>{{ m }}</option>{% endfor %}</select></div>
+  <div class="col-md-6"><label class="form-label">Date</label><input class="form-control" type="date" name="date" value="{{ today or '' }}"></div>
+  <div class="col-md-6"><label class="form-label">Note</label><input class="form-control" name="note" maxlength="255"></div></div>
+ <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Record payment</button></div></form></div></div>

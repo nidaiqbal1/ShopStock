@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Statement - {{ c.name }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><h1>Statement</h1><div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer"></i> Print statement</button>
+<a class="btn btn-primary" href="{{ url_for('khata.statement_pdf', cid=c.id, lang='en') }}"><i class="bi bi-download"></i> Download PDF</a>
+<a class="btn btn-primary" href="{{ url_for('khata.statement_pdf', cid=c.id, lang='ur') }}"><i class="bi bi-download"></i> اردو PDF</a>
+{% if wa and c.balance > 0 %}<a class="btn btn-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.send_reminder', cid=c.id) }}">💬 Send WhatsApp reminder</a>{% endif %}</div></div>
+<div class="card"><div class="card-body"><h4 class="mb-0">{{ shop.shop_name }}</h4><div class="text-muted small">{{ shop.address }} {{ shop.phone }}</div><hr>
+<h5>Khata statement: {{ c.name }}</h5><div class="small text-muted mb-3">{{ c.phone or '' }} · Printed {{ today.strftime('%d %b %Y') }}</div>
+{% if ledger %}<table class="table"><thead><tr><th>Date</th><th>Description</th><th class="num">Credit given</th><th class="num">Payment</th><th class="num">Balance</th></tr></thead><tbody>
+{% for r in ledger %}<tr><td>{{ r.date.strftime('%d %b %Y') }}</td><td>{{ r.desc }}</td><td class="num">{{ r.debit|money if r.debit else '-' }}</td><td class="num">{{ r.credit|money if r.credit else '-' }}</td><td class="num">{{ r.balance|money }}</td></tr>{% endfor %}</tbody></table>
+{% else %}<div class="empty">No transactions.</div>{% endif %}
+<div class="text-end"><div>Total credit: {{ c.total_credit|money }}</div><div>Total payments: {{ c.total_payments|money }}</div><div class="fs-5 fw-bold">Outstanding: {{ c.balance|money }}</div></div></div></div>
+{% endblock %}

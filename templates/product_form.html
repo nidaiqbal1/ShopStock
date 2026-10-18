@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}{{ 'Edit' if product else 'Add' }} product{% endblock %}
+{% block content %}
+{% set p = product %}
+<div class="page-head"><h1>{{ 'Edit product' if p else 'Add product' }}</h1></div>
+<form method="post" class="card card-body">{{ csrf_input() }}<div class="row g-3">
+ <div class="col-md-6"><label class="form-label">Product name *</label><input class="form-control" name="name" required maxlength="150" value="{{ p.name if p }}"></div>
+ <div class="col-md-3"><label class="form-label">SKU</label><input class="form-control" name="sku" maxlength="60" value="{{ p.sku or '' if p }}"></div>
+ <div class="col-md-3"><label class="form-label">Barcode</label><input class="form-control" name="barcode" maxlength="60" value="{{ p.barcode or '' if p }}"></div>
+ <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category_id"><option value="">None</option>{% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if p and p.category_id == c.id }}>{{ c.name }}</option>{% endfor %}</select><div class="form-text">Add categories from the Products page.</div></div>
+ <div class="col-md-4"><label class="form-label">Brand</label><input class="form-control" name="brand" maxlength="80" value="{{ p.brand or '' if p }}"></div>
+ <div class="col-md-4"><label class="form-label">Supplier</label><select class="form-select" name="supplier_id"><option value="">None</option>{% for s in suppliers %}<option value="{{ s.id }}" {{ 'selected' if p and p.supplier_id == s.id }}>{{ s.name }}</option>{% endfor %}</select></div>
+ <div class="col-md-3"><label class="form-label">Purchase price *</label><input class="form-control" type="number" step="any" min="0" name="purchase_price" required value="{{ p.purchase_price if p }}"></div>
+ <div class="col-md-3"><label class="form-label">Selling price *</label><input class="form-control" type="number" step="any" min="0" name="selling_price" required value="{{ p.selling_price if p }}"></div>
+ <div class="col-md-2"><label class="form-label">Minimum stock</label><input class="form-control" type="number" step="any" min="0" name="min_stock" placeholder="{{ default_min }}" value="{{ p.min_stock if p }}"></div>
+ <div class="col-md-2"><label class="form-label">Unit</label><input class="form-control" name="unit" maxlength="20" value="{{ p.unit if p else 'pcs' }}" placeholder="pcs, kg, box"></div>
+ <div class="col-md-2"><label class="form-label">Stock quantity</label>{% if p %}<input class="form-control" value="{{ p.stock_qty|qty }}" disabled><div class="form-text">Use Inventory to adjust.</div>{% else %}<input class="form-control" type="number" step="any" min="0" name="stock_qty" placeholder="0"><div class="form-text">Opening stock</div>{% endif %}</div>
+ <div class="col-12"><label class="form-label">Description</label><textarea class="form-control" rows="3" name="description" maxlength="1000">{{ p.description or '' if p }}</textarea></div>
+</div><div class="mt-3 d-flex gap-2"><button class="btn btn-primary">Save product</button><a class="btn btn-light" href="{{ url_for('products.list_products') }}">Cancel</a></div></form>
+{% endblock %}

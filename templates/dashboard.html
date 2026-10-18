@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head"><h1>{{ t('Dashboard') }}</h1><a class="btn btn-primary" href="{{ url_for('sales.pos') }}"><i class="bi bi-cart-check"></i> {{ t('New Sale') }}</a></div>
+{% set cards = [('bi-box-seam','Total products',stats.products,''),('bi-boxes','Total stock quantity',stats.stock_qty|qty,''),
+ ('bi-cash-stack',"Today's sales",stats.today_sales|money,'good'),('bi-graph-up-arrow',"Today's profit",stats.today_profit|money,'good'),
+ ('bi-person-lines-fill','Total receivables',stats.receivables|money,'warn'),('bi-wallet2','Total expenses',stats.expenses|money,'bad'),
+ ('bi-exclamation-triangle','Low-stock products',stats.low_stock,'warn'),('bi-people','Total customers',stats.customers,'')] %}
+<div class="row g-3 mb-3">{% for ic, l, v, cls in cards %}<div class="col-6 col-xl-3"><div class="card stat {{ cls }}"><div class="ico"><i class="bi {{ ic }}"></i></div><div><div class="v">{{ v }}</div><div class="l">{{ t(l) }}</div></div></div></div>{% endfor %}</div>
+<div class="row g-3 mb-3">
+ <div class="col-lg-8"><div class="card h-100"><div class="card-header">{{ t('Sales & profit (last 30 days)') }}</div><div class="card-body">
+  {% if charts.sales_labels %}<div class="chart-box chart-lg"><canvas id="cSales"></canvas></div>{% else %}<div class="empty"><i class="bi bi-graph-up"></i>{{ t('No data available yet.') }}</div>{% endif %}</div></div></div>
+ <div class="col-lg-4"><div class="card h-100"><div class="card-header">🤖 {{ t('AI Business Insights') }}</div><div class="card-body">
+  {% for ic, t in insights %}<div class="insight"><i class="bi {{ ic }}"></i><div>{{ t }}</div></div>{% else %}<div class="empty"><i class="bi bi-stars"></i>{{ t('No business data available yet.') }}</div>{% endfor %}</div></div></div>
+</div>
+<div class="row g-3 mb-3">
+ <div class="col-md-4"><div class="card h-100"><div class="card-header">{{ t('Top-selling products') }}</div><div class="card-body">{% if charts.top_labels %}<div class="chart-box"><canvas id="cTop"></canvas></div>{% else %}<div class="empty">{{ t('No data available yet.') }}</div>{% endif %}</div></div></div>
+ <div class="col-md-4"><div class="card h-100"><div class="card-header">{{ t('Expenses by category') }}</div><div class="card-body">{% if charts.exp_labels %}<div class="chart-box"><canvas id="cExp"></canvas></div>{% else %}<div class="empty">{{ t('No data available yet.') }}</div>{% endif %}</div></div></div>
+ <div class="col-md-4"><div class="card h-100"><div class="card-header">{{ t('Stock status') }}</div><div class="card-body">{% if charts.stock %}<div class="chart-box"><canvas id="cStock"></canvas></div>{% else %}<div class="empty">{{ t('No data available yet.') }}</div>{% endif %}</div></div></div>
+</div>
+<div class="card"><div class="card-header">⚠ {{ t('Low-stock products') }}</div>
+ {% if low %}<div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th class="num">Stock</th><th class="num">Minimum</th><th>Status</th></tr></thead><tbody>
+ {% for p in low %}<tr><td><a href="{{ url_for('products.view_product', pid=p.id) }}">{{ p.name }}</a></td><td class="num">{{ p.stock_qty|qty }} {{ p.unit }}</td><td class="num">{{ p.min_stock|qty }}</td><td><span class="badge {{ 'badge-out' if p.stock_qty <= 0 else 'badge-low' }}">{{ '⚠ Out of stock' if p.stock_qty <= 0 else '⚠ Low Stock' }}</span></td></tr>{% endfor %}</tbody></table></div>
+ {% else %}<div class="empty">No low-stock products.</div>{% endif %}</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/chart/chart.umd.min.js') }}"></script>
+<script>
+const D = {{ charts|tojson }}, P = ['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
+const mk = (id, cfg) => { const el = document.getElementById(id); if (el && window.Chart) new Chart(el, cfg); };
+// NOTE: a fresh options object per chart - Chart.js writes scales into it, so sharing one breaks the other charts
+const opt = () => ({responsive: true, maintainAspectRatio: false});
+mk('cSales', {type: 'line', data: {labels: D.sales_labels, datasets: [{label: 'Sales', data: D.sales_values, borderColor: P[0], backgroundColor: P[0] + '22', fill: true, tension: .3},
+  {label: 'Profit', data: D.profit_values, borderColor: P[1], tension: .3}]}, options: opt()});
+mk('cTop', {type: 'bar', data: {labels: D.top_labels, datasets: [{label: 'Units sold', data: D.top_values, backgroundColor: P[0]}]}, options: {...opt(), indexAxis: 'y', plugins: {legend: {display: false}}}});
+mk('cExp', {type: 'doughnut', data: {labels: D.exp_labels, datasets: [{data: D.exp_values, backgroundColor: P}]}, options: opt()});
+mk('cStock', {type: 'doughnut', data: {labels: ['In stock', 'Low stock', 'Out of stock'], datasets: [{data: D.stock, backgroundColor: ['#10b981', '#f59e0b', '#ef4444']}]}, options: opt()});
+</script>
+{% endblock %}

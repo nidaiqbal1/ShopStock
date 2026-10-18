@@ -1,0 +1,15 @@
+SHOPSTOCK SOFTWARE LICENCE AGREEMENT  — TEMPLATE (not legal advice; have a lawyer review before use)
+
+Licensor: [YOUR NAME / BUSINESS]        Licensee (shop): [SHOP NAME]        Date: [DATE]
+
+1. Grant. The Licensor grants the Licensee a non-exclusive, non-transferable licence to install and use ShopStock at [ONE shop / NUMBER of PCs] for its own business.
+2. Restrictions. The Licensee may not copy for resale, rent, sublicense, reverse engineer or remove ownership notices, except where the law allows.
+3. Data. All business data entered belongs to the Licensee. The Licensee is responsible for keeping backups (ShopStock provides daily automatic backups and a backup page, but these are stored on the Licensee's own computer).
+4. Support & updates. [DESCRIBE: e.g. 12 months of phone/WhatsApp support and free bug-fix updates]. Further support: [FEE].
+5. No warranty. The software is provided "as is". The Licensor does not guarantee it is free of errors or suitable for tax/accounting compliance (including FBR requirements). The Licensee should check important figures.
+6. Limitation of liability. To the extent allowed by law, the Licensor is not liable for lost profits, lost data or indirect damages. Total liability is limited to the licence fee paid.
+7. Third-party components. ShopStock includes open-source components (Flask, SQLAlchemy, ReportLab, Bootstrap, Chart.js, Waitress, openpyxl, arabic-reshaper, python-bidi, Noto Naskh Arabic font under the SIL Open Font License) under their own licences.
+8. Termination. The licence ends if the Licensee breaches these terms; the Licensee then stops using the software.
+9. Governing law. Laws of Pakistan; courts of [CITY].
+
+Signed: ______________ (Licensor)      ______________ (Licensee)

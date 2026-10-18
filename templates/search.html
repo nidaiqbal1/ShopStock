@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Search{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Search results{% if q %}: “{{ q }}”{% endif %}</h1></div>
+{% if not q %}<div class="card"><div class="empty"><i class="bi bi-search"></i>Type something in the search bar.</div></div>{% else %}
+<div class="row g-3"><div class="col-lg-4"><div class="card"><div class="card-header">Products ({{ res.products|length }})</div><ul class="list-group list-group-flush">{% for p in res.products %}<li class="list-group-item"><a href="{{ url_for('products.view_product', pid=p.id) }}">{{ p.name }}</a><div class="small text-muted">{{ p.sku or '' }} {{ p.barcode or '' }} · {{ p.stock_qty|qty }} {{ p.unit }}</div></li>{% else %}<li class="list-group-item text-muted">No matches</li>{% endfor %}</ul></div></div>
+<div class="col-lg-4"><div class="card"><div class="card-header">Customers ({{ res.customers|length }})</div><ul class="list-group list-group-flush">{% for c in res.customers %}<li class="list-group-item"><a href="{{ url_for('customers.view_customer', cid=c.id) }}">{{ c.name }}</a><div class="small text-muted">{{ c.phone or '' }}</div></li>{% else %}<li class="list-group-item text-muted">No matches</li>{% endfor %}</ul></div></div>
+{% if is_owner %}<div class="col-lg-4"><div class="card"><div class="card-header">Suppliers ({{ res.suppliers|length }})</div><ul class="list-group list-group-flush">{% for s in res.suppliers %}<li class="list-group-item"><a href="{{ url_for('suppliers.view_supplier', sid=s.id) }}">{{ s.name }}</a><div class="small text-muted">{{ s.phone or '' }}</div></li>{% else %}<li class="list-group-item text-muted">No matches</li>{% endfor %}</ul></div></div>{% endif %}</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Khata{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Khata (Udhaar)</h1><div class="fw-semibold">Total outstanding: <span class="text-danger">{{ total|money }}</span></div></div>
+<form class="mb-3"><div class="input-group" style="max-width:420px"><input class="form-control" name="q" value="{{ q }}" placeholder="Search customer"><button class="btn btn-primary">Search</button></div></form>
+<div class="card">{% if rows %}<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Customer</th><th class="num">Total credit</th><th class="num">Total payments</th><th class="num">Outstanding</th><th></th></tr></thead><tbody>
+{% for c in rows %}<tr><td><a class="fw-semibold text-decoration-none" href="{{ url_for('customers.view_customer', cid=c.id) }}">{{ c.name }}</a><div class="small text-muted">{{ c.phone or '' }}</div></td>
+<td class="num">{{ c.total_credit|money }}</td><td class="num">{{ c.total_payments|money }}</td><td class="num {{ 'text-danger fw-semibold' if c.balance > 0 }}">{{ c.balance|money }}</td>
+<td class="num">{% if c.balance > 0 %}<button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#payModal" data-action="{{ url_for('khata.record_payment', cid=c.id) }}" data-name="{{ c.name }}" data-max="{{ c.balance }}">Record payment</button>
+<a class="btn btn-sm btn-outline-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.send_reminder', cid=c.id) }}">💬 Remind</a>{% endif %}
+<a class="btn btn-sm btn-light" href="{{ url_for('khata.statement', cid=c.id) }}">Statement</a></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty"><i class="bi bi-journal-bookmark"></i>No khata records yet. Credit sales made in the POS appear here.</div>{% endif %}</div>
+{% set pay_title = 'Record payment' %}{% set today = None %}{% include "_pay_modal.html" %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Backup & Restore{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Backup &amp; Restore</h1><div class="d-flex gap-2"><a class="btn btn-outline-primary" href="{{ url_for('backup.download_now') }}"><i class="bi bi-download"></i> Download backup now</a>
+<form method="post" action="{{ url_for('backup.create') }}">{{ csrf_input() }}<button class="btn btn-primary"><i class="bi bi-cloud-arrow-up"></i> Create backup</button></form></div></div>
+<div class="alert alert-info small">ShopStock makes an <b>automatic backup every day</b> (the last 14 are kept). Your whole business is in one database file — also copy a backup to a USB drive or cloud folder regularly.</div>
+<div class="row g-3"><div class="col-lg-8"><div class="card"><div class="card-header">Saved backups</div>{% if backups %}<div class="table-responsive"><table class="table"><thead><tr><th>File</th><th>Created</th><th class="num">Size</th><th></th></tr></thead><tbody>
+{% for b in backups %}<tr><td>{{ b.name }}</td><td>{{ b.when.strftime('%d %b %Y %H:%M') }}</td><td class="num">{{ b.size_kb }} KB</td><td class="num"><a class="btn btn-sm btn-light" href="{{ url_for('backup.download', name=b.name) }}"><i class="bi bi-download"></i></a>
+<form class="d-inline" method="post" action="{{ url_for('backup.restore') }}" data-confirm="Restore this backup? Current data will be replaced (a safety copy is saved first) and everyone will be logged out.">{{ csrf_input() }}<input type="hidden" name="name" value="{{ b.name }}"><button class="btn btn-sm btn-outline-danger">Restore</button></form></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No backups yet.</div>{% endif %}</div></div>
+<div class="col-lg-4"><div class="card card-body mb-3"><h6>Restore from a file</h6><form method="post" action="{{ url_for('backup.restore') }}" enctype="multipart/form-data" data-confirm="Restore from this file? Current data will be replaced (a safety copy is saved first).">{{ csrf_input() }}
+<input class="form-control mb-2" type="file" name="file" accept=".db" required><button class="btn btn-outline-danger">Restore</button></form></div>
+<div class="card card-body"><h6>Extra backup folder</h6><div class="small text-muted mb-2">Every backup is also copied here (e.g. <code>E:\ShopStockBackups</code> on a USB drive or a OneDrive folder).</div>
+<form method="post" action="{{ url_for('backup.folder') }}">{{ csrf_input() }}<input class="form-control mb-2" name="folder" value="{{ folder }}" placeholder="Folder path (optional)"><button class="btn btn-primary btn-sm">Save</button></form></div></div></div>
+{% endblock %}

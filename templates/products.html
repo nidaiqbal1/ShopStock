@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block title %}Products{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Products</h1><div class="d-flex gap-2">
+ {% if is_owner %}<button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#catModal"><i class="bi bi-tags"></i> Categories</button>{% endif %}
+ {% if is_owner %}<a class="btn btn-outline-success" href="{{ url_for('exports.export', kind='products') }}"><i class="bi bi-file-earmark-excel"></i> Excel</a><a class="btn btn-primary" href="{{ url_for('products.new_product') }}"><i class="bi bi-plus-lg"></i> Add product</a>{% endif %}</div></div>
+<form class="card card-body mb-3"><div class="row g-2">
+ <div class="col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Search name, SKU, barcode, brand"></div>
+ <div class="col-md-2"><select class="form-select" name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if cat == c.id }}>{{ c.name }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><select class="form-select" name="sort">{% for k, l in [('name','Name'),('stock','Stock'),('price','Price'),('newest','Newest')] %}<option value="{{ k }}" {{ 'selected' if sort == k }}>Sort: {{ l }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><select class="form-select" name="order"><option value="asc">Ascending</option><option value="desc" {{ 'selected' if order == 'desc' }}>Descending</option></select></div>
+ <div class="col-md-2 d-flex gap-2 align-items-center"><div class="form-check"><input class="form-check-input" type="checkbox" name="low" value="1" id="low" {{ 'checked' if low }}><label class="form-check-label" for="low">Low stock</label></div><button class="btn btn-primary ms-auto">Filter</button></div>
+</div></form>
+<div class="card">{% if products %}<div class="table-responsive"><table class="table table-hover"><thead><tr><th>Product</th><th>SKU</th><th>Barcode</th><th>Category</th>{% if is_owner %}<th class="num">Purchase</th>{% endif %}<th class="num">Selling</th><th class="num">Stock</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in products %}<tr><td><a class="fw-semibold text-decoration-none" href="{{ url_for('products.view_product', pid=p.id) }}">{{ p.name }}</a><div class="small text-muted">{{ p.brand or '' }}</div></td><td>{{ p.sku or '-' }}</td><td>{{ p.barcode or '-' }}</td><td>{{ p.category.name if p.category else '-' }}</td>
+{% if is_owner %}<td class="num">{{ p.purchase_price|money }}</td>{% endif %}<td class="num">{{ p.selling_price|money }}</td><td class="num">{{ p.stock_qty|qty }} {{ p.unit }}</td>
+<td>{% if p.stock_qty <= 0 %}<span class="badge badge-out">⚠ Out of stock</span>{% elif p.is_low %}<span class="badge badge-low">⚠ Low Stock</span>{% else %}<span class="badge badge-ok">In stock</span>{% endif %}</td>
+<td class="num">{% if is_owner %}<a class="btn btn-sm btn-light" href="{{ url_for('products.edit_product', pid=p.id) }}"><i class="bi bi-pencil"></i></a>
+<form class="d-inline" method="post" action="{{ url_for('products.delete_product', pid=p.id) }}" data-confirm="Delete product '{{ p.name }}'? Past sales and purchases keep the product name in their history. Its stock record is removed. This cannot be undone.">{{ csrf_input() }}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button></form>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty"><i class="bi bi-box-seam"></i>No products found. Add your first product to get started.</div>{% endif %}</div>
+<div class="modal fade" id="catModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Categories</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">
+ <form method="post" action="{{ url_for('products.add_category') }}" class="input-group mb-3">{{ csrf_input() }}<input class="form-control" name="name" placeholder="New category name" required maxlength="80"><button class="btn btn-primary">Add</button></form>
+ {% for c in categories %}<div class="d-flex justify-content-between border-bottom py-2"><span>{{ c.name }}</span>
+ <form method="post" action="{{ url_for('products.delete_category', cid=c.id) }}" data-confirm="Delete category '{{ c.name }}'?">{{ csrf_input() }}<button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></button></form></div>{% else %}<div class="text-muted">No categories yet.</div>{% endfor %}
+</div></div></div></div>
+{% endblock %}

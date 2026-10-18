@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}" data-bs-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf" content="{{ csrf_token() }}">
+<title>{% block title %}Dashboard{% endblock %} · ShopStock</title>
+<link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.rtl.min.css' if lang == 'ur' else 'vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='vendor/icons/bootstrap-icons.min.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body data-currency="{{ currency }}">
+{% block shell %}
+{% set nav = [('dashboard.index','bi-speedometer2','Dashboard',1),('sales.pos','bi-cart-check','POS / New Sale',0),('sales.list_sales','bi-receipt','Sales',0),
+ ('products.list_products','bi-box-seam','Products',0),('products.inventory','bi-boxes','Inventory',1),('customers.list_customers','bi-people','Customers',0),
+ ('khata.index','bi-journal-bookmark','Khata (Udhaar)',0),('suppliers.list_suppliers','bi-truck','Suppliers',1),('purchases.list_purchases','bi-bag-plus','Purchases',1),
+ ('expenses.list_expenses','bi-wallet2','Expenses',1),('reports.index','bi-bar-chart-line','Reports',1),('ai.assistant','bi-robot','AI Assistant',1),
+ ('users.list_users','bi-person-gear','Users',1),('backup.index','bi-cloud-arrow-up','Backup & Restore',1),('dashboard.settings','bi-gear','Settings',1)] %}
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><i class="bi bi-shop-window"></i> ShopStock<small>Smart Shop &amp; Inventory Management</small></div>
+    <nav>{% for ep, ic, label, owner_only in nav %}{% if is_owner or not owner_only %}<a href="{{ url_for(ep) }}" class="{{ 'active' if request.endpoint == ep }}"><i class="bi {{ ic }}"></i>{% if ep == 'ai.assistant' %}🤖 {% endif %}{{ t(label) }}</a>{% endif %}{% endfor %}</nav>
+  </aside>
+  <div class="overlay" id="sbOverlay"></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="btn btn-light d-lg-none" id="sbToggle" aria-label="Menu"><i class="bi bi-list"></i></button>
+      <form class="search" action="{{ url_for('dashboard.search') }}"><div class="input-group"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input class="form-control" name="q" placeholder="{{ t('Search products, customers, suppliers...') }}" value="{{ request.args.get('q','') if request.endpoint == 'dashboard.search' }}"></div></form>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="d-none d-md-inline fw-semibold">{{ shop.shop_name }}</span>
+        <div class="btn-group btn-group-sm"><a class="btn btn-{{ 'primary' if lang == 'en' else 'outline-secondary' }}" href="{{ url_for('auth.set_language', code='en') }}">EN</a><a class="btn btn-{{ 'primary' if lang == 'ur' else 'outline-secondary' }}" href="{{ url_for('auth.set_language', code='ur') }}">اردو</a></div>
+        <a class="btn btn-light btn-sm" href="{{ url_for('auth.account') }}" title="{{ t('Account') }}"><i class="bi bi-person-circle"></i> <span class="d-none d-md-inline">{{ g.user.full_name }} <small class="text-muted">({{ g.user.role }})</small></span></a>
+        <form method="post" action="{{ url_for('auth.logout') }}">{{ csrf_input() }}<button class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-right"></i><span class="d-none d-sm-inline"> {{ t('Logout') }}</span></button></form>
+      </div>
+    </header>
+    <main class="content">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% endblock %}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100">
+{% for cat, msg in get_flashed_messages(with_categories=true) %}
+  <div class="toast align-items-center border-0 text-bg-{{ 'success' if cat == 'success' else 'danger' if cat == 'error' else 'info' }}"><div class="d-flex"><div class="toast-body">{{ msg }}</div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>
+{% endfor %}</div>
+<div class="modal fade" id="confirmModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title">Please confirm</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body msg"></div>
+  <div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger ok">Yes, continue</button></div></div></div></div>
+<script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body></html>

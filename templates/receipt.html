@@ -1,0 +1,23 @@
+<!doctype html><html lang="{{ lang }}" dir="{{ dir }}"><head><meta charset="utf-8"><title>Receipt {{ s.invoice_no }}</title>
+<style>
+@page{size:80mm auto;margin:2mm}
+body{font-family:"Segoe UI",Tahoma,monospace;font-size:12px;width:76mm;margin:0 auto;color:#000}
+h1{font-size:16px;text-align:center;margin:4px 0 0}.c{text-align:center}.small{font-size:10px}
+table{width:100%;border-collapse:collapse}td{padding:1px 0;vertical-align:top}.r{text-align:right}hr{border:0;border-top:1px dashed #000;margin:5px 0}
+.b{font-weight:bold}.void{text-align:center;font-size:16px;font-weight:bold;border:2px solid #000;margin:4px 0}
+.noprint{text-align:center;margin:8px}@media print{.noprint{display:none}}
+</style></head><body>
+<div class="noprint"><button onclick="window.print()">Print</button> <a href="{{ url_for('sales.view_sale', sid=s.id) }}">Back</a></div>
+<h1>{{ shop.shop_name }}</h1><div class="c small">{{ shop.address }}<br>{{ shop.phone }}</div><hr>
+{% if s.status == 'voided' %}<div class="void">VOIDED</div>{% endif %}
+<div>{{ t('Invoice') }}: <b>{{ s.invoice_no }}</b></div><div>{{ t('Date') }}: {{ s.date.strftime('%d-%m-%Y') }} {{ s.created_at.strftime('%H:%M') }}</div>
+<div>{{ t('Customer') }}: {{ s.customer.name if s.customer else t('Walk-in customer') }}</div><hr>
+<table>{% for i in s.items %}<tr><td colspan="2">{{ i.product_name }}</td></tr><tr><td>{{ i.quantity|qty }} × {{ i.selling_price|money }}</td><td class="r">{{ i.subtotal|money }}</td></tr>
+{% if i.returned_qty %}<tr><td colspan="2" class="small">returned: {{ i.returned_qty|qty }}</td></tr>{% endif %}{% endfor %}</table><hr>
+<table><tr><td>{{ t('Subtotal') }}</td><td class="r">{{ s.subtotal|money }}</td></tr><tr><td>{{ t('Discount') }}</td><td class="r">- {{ s.discount|money }}</td></tr>
+{% if s.returned_total %}<tr><td>{{ t('Returns') }}</td><td class="r">- {{ s.returned_total|money }}</td></tr>{% endif %}
+<tr class="b"><td>{{ t('Grand total') }}</td><td class="r">{{ s.total|money }}</td></tr><tr><td>{{ t('Paid') }} ({{ s.payment_method }})</td><td class="r">{{ s.paid|money }}</td></tr>
+<tr class="b"><td>{{ t('Remaining') }}</td><td class="r">{{ s.remaining|money }}</td></tr></table><hr>
+<div class="c">{{ t('Thank you for shopping with us!') }}</div><div class="c small">Powered by ShopStock</div>
+{% if auto %}<script>window.onload=()=>window.print()</script>{% endif %}
+</body></html>

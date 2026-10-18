@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% block title %}Record purchase{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Record purchase</h1></div>
+{% if not suppliers or not products %}<div class="card"><div class="empty"><i class="bi bi-info-circle"></i>You need at least one supplier and one product before recording a purchase.<div class="mt-2"><a class="btn btn-sm btn-primary" href="{{ url_for('suppliers.list_suppliers') }}">Suppliers</a> <a class="btn btn-sm btn-primary" href="{{ url_for('products.new_product') }}">Add product</a></div></div></div>
+{% else %}
+<form method="post" class="card card-body">{{ csrf_input() }}<div class="row g-3 mb-2">
+ <div class="col-md-4"><label class="form-label">Supplier *</label><select class="form-select" name="supplier_id" required><option value="">Select supplier</option>{% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}{{ ' - ' ~ s.company if s.company }}</option>{% endfor %}</select></div>
+ <div class="col-md-3"><label class="form-label">Date</label><input class="form-control" type="date" name="date" value="{{ today }}"></div>
+ <div class="col-md-5"><label class="form-label">Notes</label><input class="form-control" name="notes" maxlength="500"></div></div>
+<table class="table" id="lines"><thead><tr><th style="width:42%">Product</th><th>Quantity</th><th>Purchase price</th><th class="num">Line total</th><th></th></tr></thead><tbody></tbody></table>
+<button type="button" class="btn btn-sm btn-outline-primary align-self-start mb-3" id="addLine"><i class="bi bi-plus"></i> Add product line</button>
+<div class="row g-3"><div class="col-md-4"><label class="form-label">Payment status</label><select class="form-select" name="payment_status" id="pstatus"><option>Paid</option><option>Partial</option><option>Unpaid</option></select></div>
+ <div class="col-md-4" id="paidBox" style="display:none"><label class="form-label">Amount paid now</label><input class="form-control" type="number" step="any" min="0" name="paid"></div>
+ <div class="col-md-4 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="update_price" id="up" checked><label class="form-check-label" for="up">Update product purchase price</label></div></div></div>
+<div class="mt-3 d-flex justify-content-between align-items-center"><div class="fs-5 fw-bold">Total: <span id="grand">0</span></div><div><button class="btn btn-primary">Save purchase</button> <a class="btn btn-light" href="{{ url_for('purchases.list_purchases') }}">Cancel</a></div></div></form>
+<template id="lineTpl"><tr><td><select class="form-select form-select-sm" name="product_id" required><option value="">Select product</option>{% for p in products %}<option value="{{ p.id }}" data-price="{{ p.purchase_price }}">{{ p.name }}{{ ' (' ~ p.sku ~ ')' if p.sku }}</option>{% endfor %}</select></td>
+<td><input class="form-control form-control-sm q" type="number" step="any" min="0.001" name="quantity" required></td><td><input class="form-control form-control-sm pr" type="number" step="any" min="0" name="unit_price" required></td><td class="num lt">0</td>
+<td><button type="button" class="btn btn-sm btn-light text-danger rm"><i class="bi bi-x-lg"></i></button></td></tr></template>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+const body = document.querySelector('#lines tbody'), tpl = document.getElementById('lineTpl');
+if (tpl) {
+  const calc = () => { let t = 0; body.querySelectorAll('tr').forEach(r => { const v = (+r.querySelector('.q').value || 0) * (+r.querySelector('.pr').value || 0); r.querySelector('.lt').textContent = v.toLocaleString(); t += v; }); document.getElementById('grand').textContent = document.body.dataset.currency + ' ' + t.toLocaleString(); };
+  const add = () => { const r = tpl.content.firstElementChild.cloneNode(true); body.appendChild(r);
+    r.querySelector('select').addEventListener('change', e => { const o = e.target.selectedOptions[0]; if (o && o.dataset.price) { r.querySelector('.pr').value = o.dataset.price; calc(); } });
+    r.querySelectorAll('input').forEach(i => i.addEventListener('input', calc)); r.querySelector('.rm').addEventListener('click', () => { if (body.children.length > 1) { r.remove(); calc(); } }); };
+  document.getElementById('addLine').addEventListener('click', add); add();
+  document.getElementById('pstatus').addEventListener('change', e => document.getElementById('paidBox').style.display = e.target.value === 'Partial' ? '' : 'none');
+}
+</script>{% endblock %}

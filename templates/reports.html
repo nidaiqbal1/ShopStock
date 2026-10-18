@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Reports</h1>{% if report %}<div class="d-flex gap-2"><a class="btn btn-outline-success" href="{{ url_for('exports.report_xlsx', type=kind, period=period, start=start, end=end) }}"><i class="bi bi-file-earmark-excel"></i> Excel</a><a class="btn btn-primary" href="{{ url_for('reports.pdf', type=kind, period=period, start=start, end=end) }}"><i class="bi bi-file-earmark-pdf"></i> Download PDF</a></div>{% endif %}</div>
+<form class="card card-body mb-3"><div class="row g-2 align-items-end">
+ <div class="col-md-3"><label class="form-label small">Report</label><select class="form-select" name="type">{% for k, l in types.items() %}<option value="{{ k }}" {{ 'selected' if k == kind }}>{{ l }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><label class="form-label small">Period</label><select class="form-select" name="period" id="period">{% for k, l in [('daily','Daily (today)'),('weekly','Weekly (7 days)'),('monthly','Monthly (this month)'),('custom','Custom range')] %}<option value="{{ k }}" {{ 'selected' if k == period }}>{{ l }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><label class="form-label small">From</label><input type="date" class="form-control" name="start" value="{{ start }}"></div><div class="col-md-2"><label class="form-label small">To</label><input type="date" class="form-control" name="end" value="{{ end }}"></div>
+ <div class="col-md-3"><button class="btn btn-primary">Generate</button> <span class="small text-muted">Dates apply to Custom range. Receivables, payables and inventory show current status.</span></div></div></form>
+{% if report %}<div class="card"><div class="card-header">{{ report.title }} <span class="text-muted fw-normal">· {{ report.subtitle }}</span></div>
+{% if report.rows %}<div class="table-responsive"><table class="table"><thead><tr>{% for h in report.headers %}<th class="{{ 'num' if loop.index0 in report.num_cols }}">{{ h }}</th>{% endfor %}</tr></thead><tbody>
+{% for r in report.rows %}<tr>{% for v in r %}<td class="{{ 'num' if loop.index0 in report.num_cols }}">{{ v }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty"><i class="bi bi-bar-chart"></i>No data available for this report.</div>{% endif %}
+<div class="card-body border-top">{% for l, v in report.summary %}<div class="d-flex justify-content-between" style="max-width:380px"><span>{{ l }}</span><b>{{ v }}</b></div>{% endfor %}</div></div>{% endif %}
+{% endblock %}

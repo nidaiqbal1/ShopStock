@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% block title %}Error{% endblock %}
+{% block shell %}<div class="login-wrap"><div class="card login-card text-center"><div class="display-4 text-danger"><i class="bi bi-exclamation-octagon"></i></div><h5>Something went wrong</h5>
+<p class="text-muted">{{ message or "An unexpected error occurred. Your data is safe." }}</p><a class="btn btn-primary" href="{{ url_for('dashboard.index') }}">Back to dashboard</a></div></div>{% endblock %}

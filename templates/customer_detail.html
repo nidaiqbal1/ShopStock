@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}{{ c.name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ c.name }}</h1><div class="d-flex flex-wrap gap-2">
+ {% if wa %}<a class="btn btn-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.chat', cid=c.id) }}">💬 WhatsApp</a>
+ {% if c.balance > 0 %}<a class="btn btn-outline-success" target="_blank" rel="noopener" href="{{ url_for('whatsapp.send_reminder', cid=c.id) }}">Send Payment Reminder</a>{% endif %}{% endif %}
+ {% if c.balance > 0 %}<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#payModal" data-action="{{ url_for('khata.record_payment', cid=c.id) }}" data-name="{{ c.name }}" data-max="{{ c.balance }}">Record payment</button>{% endif %}
+ <a class="btn btn-outline-secondary" href="{{ url_for('khata.statement', cid=c.id) }}">Statement</a>
+ {% if is_owner %}<form method="post" action="{{ url_for('customers.delete_customer', cid=c.id) }}" data-confirm="Delete customer '{{ c.name }}'?{% if c.sales or c.payments %} Their {{ c.sales|length }} sale(s) stay in your reports as walk-in sales, but their khata balance and {{ c.payments|length }} payment record(s) are erased.{% endif %} This cannot be undone.">{{ csrf_input() }}<button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete</button></form>{% endif %}</div></div>
+<div class="row g-3 mb-3">
+ <div class="col-md-4"><div class="card card-body"><div class="text-muted small">Contact</div><div>{{ c.phone or 'No phone' }}</div><div>{{ c.email or '' }}</div><div>{{ c.address or '' }}</div><div class="small text-muted mt-1">{{ c.notes or '' }}</div>{% if not wa %}<div class="small text-danger mt-2">Add a valid phone number to use WhatsApp.</div>{% endif %}</div></div>
+ <div class="col-md-8"><div class="row g-3">{% for l, v, cls in [('Total credit', c.total_credit|money, ''),('Total payments', c.total_payments|money, 'good'),('Outstanding balance', c.balance|money, 'bad' if c.balance > 0 else 'good')] %}
+ <div class="col-md-4"><div class="card stat {{ cls }}"><div class="ico"><i class="bi bi-cash-stack"></i></div><div><div class="v">{{ v }}</div><div class="l">{{ l }}</div></div></div></div>{% endfor %}</div></div></div>
+<div class="row g-3"><div class="col-lg-7"><div class="card"><div class="card-header">Sales history</div>{% if c.sales %}<div class="table-responsive"><table class="table"><thead><tr><th>Invoice</th><th>Date</th><th class="num">Total</th><th class="num">Paid</th><th class="num">Remaining</th></tr></thead><tbody>
+{% for s in c.sales %}<tr><td><a href="{{ url_for('sales.view_sale', sid=s.id) }}">{{ s.invoice_no }}</a></td><td>{{ s.date.strftime('%d %b %Y') }}</td><td class="num">{{ s.total|money }}</td><td class="num">{{ s.paid|money }}</td><td class="num">{{ s.remaining|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No sales yet.</div>{% endif %}</div></div>
+<div class="col-lg-5"><div class="card"><div class="card-header">Payment history</div>{% if c.payments %}<div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Method</th><th class="num">Amount</th></tr></thead><tbody>
+{% for p in c.payments %}<tr><td>{{ p.date.strftime('%d %b %Y') }}</td><td>{{ p.method }}</td><td class="num">{{ p.amount|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No payments recorded.</div>{% endif %}</div></div></div>
+{% set pay_title = 'Record payment' %}{% set today = None %}{% include "_pay_modal.html" %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}POS{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ t('Point of Sale') }}</h1></div>
+<div class="row g-3">
+ <div class="col-lg-7"><div class="card"><div class="card-body">
+  <div class="row g-2 mb-3"><div class="col-9"><div class="input-group"><span class="input-group-text"><i class="bi bi-upc-scan"></i></span><input id="q" class="form-control" placeholder="Search name / SKU / barcode (scanner: scan then Enter)" autocomplete="off"></div></div>
+  <div class="col-3"><input id="addQty" type="number" class="form-control" min="0.001" step="any" value="1" title="Quantity to add"></div></div>
+  <div id="results" class="pos-results"></div></div></div></div>
+ <div class="col-lg-5"><div class="card pos-cart"><div class="card-header d-flex justify-content-between align-items-center">{{ t('Cart') }} <button class="btn btn-sm btn-light" id="clear" type="button">{{ t('Clear') }}</button></div>
+  <div class="table-responsive"><table class="table"><thead><tr><th>{{ t('Item') }}</th><th>{{ t('Qty') }}</th><th class="num">Total</th><th></th></tr></thead><tbody id="cartBody"></tbody></table></div>
+  <div class="card-body border-top">
+   <div class="sum-row"><span>{{ t('Subtotal') }}</span><span id="subtotal">-</span></div>
+   <div class="sum-row align-items-center"><span>{{ t('Discount') }} ({{ currency }})</span><input id="discount" type="number" min="0" step="any" value="0" class="form-control form-control-sm" style="width:120px"></div>
+   <div class="sum-row big"><span>{{ t('Grand total') }}</span><span id="grand">-</span></div>
+   <div class="row g-2 mt-2"><div class="col-6"><label class="form-label small mb-0">{{ t('Payment method') }}</label><select id="method" data-credit="{{ credit }}" class="form-select form-select-sm">{% for m in methods %}<option>{{ m }}</option>{% endfor %}</select></div>
+    <div class="col-6"><label class="form-label small mb-0">{{ t('Amount paid') }}</label><input id="paid" type="number" min="0" step="any" class="form-control form-control-sm"></div>
+    <div class="col-12"><label class="form-label small mb-0">Customer (required for credit / partial payment)</label><select id="customer" class="form-select form-select-sm"><option value="">{{ t('Walk-in customer') }}</option>{% for c in customers %}<option value="{{ c.id }}">{{ c.name }}{{ ' - ' ~ c.phone if c.phone }}</option>{% endfor %}</select></div></div>
+   <div class="sum-row mt-2"><span>{{ t('Remaining (udhaar)') }}</span><span id="remaining">-</span></div>
+   <button class="btn btn-primary w-100 mt-2 py-2" id="checkout" type="button"><i class="bi bi-check2-circle"></i> {{ t('Complete sale') }}</button></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/pos.js') }}"></script>{% endblock %}

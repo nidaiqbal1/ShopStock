@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}AI Assistant{% endblock %}
+{% block content %}
+<div class="page-head"><h1>🤖 AI Assistant</h1></div>
+{% if not configured %}<div class="alert alert-warning"><b>AI Assistant is not configured.</b> Add <code>GEMINI_API_KEY</code> to your <code>.env</code> file (see README) and restart ShopStock. The rest of the app works normally.</div>{% endif %}
+<div class="card"><div class="card-body">
+ <div class="chat-box mb-3" id="chat"><div class="bubble bot">Assalam-o-Alaikum! Ask me about your sales, profit, stock, customers, suppliers or expenses. I only read your recorded data and never change anything.</div></div>
+ <div class="mb-2 d-flex flex-wrap gap-2">{% for s in ["What were today's sales?","How much profit did I make this month?","Which product sells the most?","Which products are low in stock?","Who owes me the most?","How much do I owe suppliers?","What were my biggest expenses?","Give me a summary of my shop","Which products should I restock?","How much inventory value do I have?"] %}<button type="button" class="btn btn-sm btn-outline-primary chip">{{ s }}</button>{% endfor %}</div>
+ <form id="askForm" class="input-group"><input id="question" class="form-control" maxlength="500" placeholder="Ask about your shop..." autocomplete="off" {{ 'disabled' if not configured }}><button class="btn btn-primary" {{ 'disabled' if not configured }}>Ask</button></form></div></div>
+{% endblock %}
+{% block scripts %}<script>
+const chat = document.getElementById('chat'), input = document.getElementById('question'), csrf = document.querySelector('meta[name=csrf]').content;
+const say = (t, me) => { const d = document.createElement('div'); d.className = 'bubble ' + (me ? 'me' : 'bot'); d.textContent = t; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; return d; };
+async function ask(q) {
+  if (!q.trim()) return; say(q, true); input.value = ''; const w = say('Thinking...');
+  try { const r = await fetch('/ai/ask', {method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf}, body: JSON.stringify({question: q})});
+    const d = await r.json(); w.textContent = d.answer || d.error || 'No answer.'; } catch (e) { w.textContent = 'Could not reach the server.'; }
+}
+document.getElementById('askForm').addEventListener('submit', e => { e.preventDefault(); ask(input.value); });
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { if (!input.disabled) ask(c.textContent); else say('AI Assistant is not configured.'); }));
+</script>{% endblock %}

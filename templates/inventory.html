@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Inventory</h1><div class="fw-semibold">Total stock value: {{ total_value|money }}</div></div>
+<form class="mb-3"><div class="input-group" style="max-width:420px"><input class="form-control" name="q" value="{{ q }}" placeholder="Search product, SKU, barcode"><button class="btn btn-primary">Search</button></div></form>
+<div class="card mb-3">{% if products %}<div class="table-responsive"><table class="table"><thead><tr><th>Product</th><th>SKU</th><th class="num">Current stock</th><th class="num">Min stock</th><th class="num">Purchase</th><th class="num">Selling</th><th class="num">Stock value</th><th>Status</th><th></th></tr></thead><tbody>
+{% for p in products %}<tr><td>{{ p.name }}</td><td>{{ p.sku or '-' }}</td><td class="num">{{ p.stock_qty|qty }} {{ p.unit }}</td><td class="num">{{ p.min_stock|qty }}</td><td class="num">{{ p.purchase_price|money }}</td><td class="num">{{ p.selling_price|money }}</td><td class="num">{{ p.stock_value|money }}</td>
+<td>{% if p.stock_qty <= 0 %}<span class="badge badge-out">⚠ Out of stock</span>{% elif p.is_low %}<span class="badge badge-low">⚠ Low Stock</span>{% else %}<span class="badge badge-ok">In stock</span>{% endif %}</td>
+<td class="num"><button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#moveModal" data-id="{{ p.id }}" data-name="{{ p.name }}" data-type="in">Stock In</button>
+<button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#moveModal" data-id="{{ p.id }}" data-name="{{ p.name }}" data-type="out">Stock Out</button></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty"><i class="bi bi-boxes"></i>No products yet.</div>{% endif %}</div>
+<div class="card"><div class="card-header">Recent inventory movements</div>{% if moves %}<div class="table-responsive"><table class="table"><thead><tr><th>Date</th><th>Product</th><th>Type</th><th class="num">Qty</th><th class="num">Balance</th><th>Reason</th></tr></thead><tbody>
+{% for m in moves %}<tr><td>{{ m.created_at.strftime('%d %b %Y %H:%M') }}</td><td>{{ m.product.name }}</td><td><span class="badge {{ 'badge-ok' if m.movement_type == 'in' else 'badge-low' }}">{{ m.movement_type|upper }}</span></td><td class="num">{{ m.quantity|qty }}</td><td class="num">{{ m.balance_after|qty }}</td><td>{{ m.reason }}{% if m.reference %} · {{ m.reference }}{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty">No movements recorded yet.</div>{% endif %}</div>
+<div class="modal fade" id="moveModal" tabindex="-1"><div class="modal-dialog"><form method="post" class="modal-content">{{ csrf_input() }}<input type="hidden" name="type" id="mvType">
+ <div class="modal-header"><h5 class="modal-title" id="mvTitle"></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+ <div class="modal-body"><label class="form-label">Quantity</label><input class="form-control mb-2" type="number" step="any" min="0.001" name="quantity" required>
+ <label class="form-label">Reason</label><input class="form-control mb-2" name="reason" maxlength="40" placeholder="e.g. damaged, returned, correction"><label class="form-label">Note</label><input class="form-control" name="note" maxlength="255"></div>
+ <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Save</button></div></form></div></div>
+{% endblock %}
+{% block scripts %}<script>
+document.getElementById('moveModal').addEventListener('show.bs.modal', e => { const b = e.relatedTarget, m = e.target;
+ m.querySelector('form').action = '/inventory/' + b.dataset.id + '/move'; m.querySelector('#mvType').value = b.dataset.type;
+ m.querySelector('#mvTitle').textContent = (b.dataset.type === 'in' ? 'Stock In: ' : 'Stock Out: ') + b.dataset.name; m.querySelector('form').reset(); m.querySelector('#mvType').value = b.dataset.type; });
+</script>{% endblock %}
