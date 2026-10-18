@@ -133,6 +133,8 @@ def main():
     except OSError:
         print(f"\nPort {port} is already in use - ShopStock may already be running. Opening {url} ...")
 
-   app = create_app()
+   
+app = create_app()
+
 if __name__ == "__main__":
     main()
